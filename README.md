@@ -6,7 +6,7 @@ A voice chatbot based on GPT4All and talkGPT.
 Please check more details in this [blog post (in Chinese)](https://zhuanlan.zhihu.com/p/618826760).
 
 ## Installation
-### 1. Install Python Requirements
+### Install Python Requirements
 clone the code:
 ```bash
 git clone https://github.com/vra/talkGPT4All.git <ROOT>
@@ -21,19 +21,19 @@ pip install -U pip
 pip install -r requirements.txt
 ```
 
-### 2. Download Whispe model
+### Download Whispe model
 ```bash
 wget https://openaipublic.azureedge.net/main/whisper/models/ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e/base.pt -o $HOME/.cache/whisper/base.pt
 ```
 
-### 3. Download GPT4All checkpoint
+### Download GPT4All checkpoint
 + Direct link: <https://the-eye.eu/public/AI/models/nomic-ai/gpt4all/gpt4all-lora-quantized.bin>
 + Torrent: <https://tinyurl.com/gpt4all-lora-quantized>
 
 put the downloaded model to folder `<ROOT>/models`.
 
 
-### 4. Download GPT4All binary executable
+### Download GPT4All binary executable
 
 + Mac M1: <https://raw.githubusercontent.com/nomic-ai/gpt4all/main/chat/gpt4all-lora-quantized-OSX-m1>
 + Mac Intel : <https://raw.githubusercontent.com/nomic-ai/gpt4all/main/chat/gpt4all-lora-quantized-OSX-Intel>
@@ -42,7 +42,7 @@ put the downloaded model to folder `<ROOT>/models`.
 
 put the downloaded executable to `<ROOT>/bin`.
 
-### 5. Prepare Text to Voice program
+### Prepare Text to Voice program
 on Mac, no extra work needed, just use [say](https://ss64.com/osx/say.html).
 
 
@@ -72,10 +72,6 @@ Windows:
 ```bash
 python chat.py --platform windows
 ```
-
-
-也可以参见本文开头的视频或[这里](https://www.zhihu.com/zvideo/1625779747656515584)。
-
 
 ## RoadMap
 + Test code on Linux，Mac Intel and WSL2.
