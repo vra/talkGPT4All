@@ -43,12 +43,14 @@ put the downloaded model to folder `<ROOT>/models`.
 put the downloaded executable to `<ROOT>/bin`.
 
 ### Prepare Text to Voice program
-on Mac, no extra work needed, just use [say](https://ss64.com/osx/say.html).
-
-
-on Linux ，please install [espeak](https://espeak.sourceforge.net/)，For example, on Ubuntu, run `sudo apt install espeak`.
-
-On Windows , please install [wsay](https://github.com/p-groarke/wsay), you can download binary [at here](https://github.com/p-groarke/wsay/releases/tag/v1.5.0)，then put it into `<ROOT>/bin`.
+We use [pyttsx3](https://github.com/nateshmbhat/pyttsx3) to convert text to voice. You can install it by running this:
+```bash
+pip install pyttsx3
+```
+Please note that on Linux ，You need to install dependencies:
+```bash
+sudo apt update && sudo apt install espeak ffmpeg libespeak1
+```
 
 ## Usage
 pattern: `python chat.py --platform <platform>`
@@ -71,6 +73,30 @@ python chat.py --platform linux
 Windows:
 ```bash
 python chat.py --platform windows
+```
+
+You can choose whisper model type using `--whisper-model-type <type>`, all available choices:
+```python
+{
+"tiny.en"
+"tiny"
+"base.en"
+"base"
+"small.en"
+"small"
+"medium.en"
+"medium"
+"large-v1"
+"large-v2"
+"large"
+}
+```
+
+You can tune the voice rate using `--voice-rate <rate>`, default rate is 165. the larger the speak faster.
+
+e.g.,
+```bash
+python chat.py --platform mac-m1 --whisper-model-type large --voice-rate 150
 ```
 
 ## RoadMap
