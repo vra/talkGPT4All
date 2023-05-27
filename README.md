@@ -5,6 +5,8 @@ A voice chatbot based on GPT4All and talkGPT.
 
 Please check more details in this [blog post (in Chinese)](https://zhuanlan.zhihu.com/p/618826760).
 
+If you are looking for the older version of talkGPT4All, please checkout to [dev/v1.0.0](https://github.com/vra/talkGPT4All/tree/dev/v1.0.0) branch.
+
 ## Installation
 ### Install Python Requirements
 clone the code:
