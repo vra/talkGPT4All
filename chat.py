@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 
+from gpt4all import GPT4All
 import pyttsx3
 import speech_recognition as sr
 
@@ -8,9 +9,8 @@ import speech_recognition as sr
 class GPT4AllChatBot:
     """Voice chat bot based on Whisper and GPT4All"""
 
-    def __init__(self, executable_path, model_path, whisper_model_type, tts_rate=165):
-        self.executable_path = executable_path
-        self.model_path = model_path
+    def __init__(self, gpt_model_name, whisper_model_type, tts_rate=165):
+        self.gpt_model = GPT4All(gpt_model_name)
 
         self.whisper_model_type = whisper_model_type
 
@@ -34,25 +34,26 @@ class GPT4AllChatBot:
         with self.mic as source:
             self.voice_recognizer.adjust_for_ambient_noise(source)
             audio = self.voice_recognizer.listen(source)
-            transcript = self.voice_recognizer.recognize_whisper(audio, self.whisper_model_type)
+            transcript = self.voice_recognizer.recognize_whisper(
+                audio, self.whisper_model_type
+            )
             return transcript
 
-    def run_gpt(self, input_data):
+    def run_gpt(self, question):
         """Run GPT4All model with input_data as input"""
 
-        binary_program = [
-            self.executable_path,
-            "-m",
-            self.model_path,
-            "-p",
-            input_data.encode(),
-        ]
-        process = subprocess.Popen(
-            binary_program, stdin=subprocess.PIPE, stdout=subprocess.PIPE
+        messages = [{"role": "user", "content": question}]
+        response = self.gpt_model.chat_completion(
+            messages,
+            default_prompt_footer=False,
+            default_prompt_header=False,
+            verbose=False,
         )
-        output_data = process.communicate()[0]
-        string_data = output_data.decode("utf-8")
-        return string_data
+        try:
+            answer = response["choices"][0]["message"]["content"]
+        except:
+            answer = "ERROR: Wrong Response"
+        return answer
 
     def _text_to_voice(self, answer):
         """Convert text to voice using TTS tools"""
@@ -63,15 +64,27 @@ class GPT4AllChatBot:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--platform",
+        "--gpt-model-name",
         type=str,
-        default="mac-m1",
-        help="running platform, should be one of [mac-m1, mac-intel, linux, windows]",
+        default="ggml-gpt4all-j-v1.3-groovy",
+        help="""GPT4All model name, All available names:
+            [
+            ggml-gpt4all-j-v1.3-groovy
+            ggml-gpt4all-j-v1.2-jazzy
+            ggml-gpt4all-j-v1.1-breezy
+            ggml-gpt4all-j
+            ggml-gpt4all-l13b-snoozy
+            ggml-vicuna-7b-1.1-q4_2
+            ggml-vicuna-13b-1.1-q4_2
+            ggml-wizardLM-7B.q4_2
+            ggml-stable-vicuna-13B.q4_2
+            ]
+            """,
     )
     parser.add_argument(
         "--whisper-model-type",
         type=str,
-        default='base',
+        default="base",
         help="whisper model type, default is base",
     )
     parser.add_argument(
@@ -82,17 +95,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    model_path = "models/gpt4all-lora-quantized.bin"
-    executable_paths = {
-        "mac-m1": "bin/gpt4all-lora-quantized-OSX-m1",
-        "mac-intel": "bin/gpt4all-lora-quantized-OSX-intel",
-        "linux": "bin/gpt4all-lora-quantized-linux-x86",
-        "windows": "bin/gpt4all-lora-quantized-win64.exe",
-    }
-    executable_path = executable_paths.get(args.platform)
-    if executable_path is None:
-        raise NotImplementedError(f"the platform {args.platform} is not supported now!")
-
-    chat_bot = GPT4AllChatBot(executable_path, model_path, args.whisper_model_type, args.voice_rate)
+    chat_bot = GPT4AllChatBot(
+        args.gpt_model_name, args.whisper_model_type, args.voice_rate
+    )
     while True:
         chat_bot.run()
