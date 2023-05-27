@@ -2,3 +2,4 @@ openai-whisper
 pyaudio
 soundfile
 SpeechRecognition
+pyttsx3
