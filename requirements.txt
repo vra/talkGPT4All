@@ -1,5 +1,6 @@
+gpt4all
 openai-whisper
 pyaudio
+pyttsx3
 soundfile
 SpeechRecognition
-pyttsx3
