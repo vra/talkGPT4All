@@ -88,5 +88,6 @@ talkgpt4all --whisper-model-type large --voice-rate 150
 + [x] Add support for contextual information during chating.
 + [ ] Test code on Linux，Mac Intel and WSL2.
 + [ ] Add support for Chinese input and output.
++ [ ] Add Documents and Changelog
 
 contributions are welcomed!
