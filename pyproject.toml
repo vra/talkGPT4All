@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "talkgpt4all"
+version = "2.1.0"
+authors = [
+  { name="Yunfeng Wang", email="wyf.brz@gmail.com" },
+]
+description = "A voice chatbot based on GPT4All and OpenAI Whisper, running on your PC locally"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+"gpt4all",
+"openai-whisper",
+"pyaudio",
+"pyttsx3",
+"soundfile",
+"SpeechRecognition",
+]
+
+[project.scripts]
+talkgpt4all = "talkgpt4all.__init__:main"
+
+[project.urls]
+"Homepage" = "https://github.com/vra/talkGPT4All"
+"Bug Tracker" = "https://github.com/vra/talkGPT4All/issues"

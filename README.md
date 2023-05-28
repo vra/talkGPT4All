@@ -3,12 +3,18 @@ A voice chatbot based on GPT4All and talkGPT.
 
 [Video demo](https://www.zhihu.com/zvideo/1625779747656515584).
 
-Please check more details in this [blog post (in Chinese)](https://zhuanlan.zhihu.com/p/618826760).
+Please check more details in this [blog post (in Chinese)](https://zhuanlan.zhihu.com/p/632592897).
 
 If you are looking for the older version of talkGPT4All, please checkout to [dev/v1.0.0](https://github.com/vra/talkGPT4All/tree/dev/v1.0.0) branch.
 
 ## Installation
-### Install Python Requirements
+
+### Install using pip (Recommend)
+talkgpt4all is on PyPI, you can install it using simple one command:
+```bash
+pip install talkgpt4all
+```
+### Install from source code
 Clone the code:
 ```bash
 git clone https://github.com/vra/talkGPT4All.git <ROOT>
@@ -23,14 +29,17 @@ pip install -U pip
 pip install -r requirements.txt
 ```
 
-### Prepare Text to Voice program
+## Extra dependencies for Linux users
 We use [pyttsx3](https://github.com/nateshmbhat/pyttsx3) to convert text to voice. Please note that on Linux ，You need to install dependencies:
 ```bash
 sudo apt update && sudo apt install -y espeak ffmpeg libespeak1
 ```
 
 ## Usage
-pattern: `python chat.py`
+Open a terminal and type `talkgpt4all` to begin:
+```bash
+talkgpt4all
+```
 
 ### Use different LLMs
 You can choose different LLMs  using `--gpt-model-type <type>`, all available choices:
@@ -70,7 +79,7 @@ You can tune the voice rate using `--voice-rate <rate>`, default rate is 165. th
 
 e.g.,
 ```bash
-python chat.py --whisper-model-type large --voice-rate 150
+talkgpt4all --whisper-model-type large --voice-rate 150
 ```
 
 ## RoadMap
