@@ -2,8 +2,17 @@ import argparse
 import subprocess
 
 from gpt4all import GPT4All
-import pyttsx3
 import speech_recognition as sr
+from TTS.api import TTS
+from playsound import playsound
+
+
+class GlowTTS:
+    def __init__(self):
+        self.tts = TTS(model_name="tts_models/en/ljspeech/glow-tts", progress_bar=False)
+
+    def process(self, text, audio_save_path):
+        return self.tts.tts(text=text, file_path=audio_save_path)
 
 
 class GPT4AllChatBot:
@@ -17,8 +26,7 @@ class GPT4AllChatBot:
         self.voice_recognizer = sr.Recognizer()
         self.mic = sr.Microphone()
 
-        self.tts_engine = pyttsx3.init()  # object creation
-        self.tts_engine.setProperty("rate", tts_rate)
+        self.tts_engine = GlowTTS()
 
     def run(self):
         """Run the listen-think-response loop"""
@@ -57,11 +65,19 @@ class GPT4AllChatBot:
 
     def _text_to_voice(self, answer):
         """Convert text to voice using TTS tools"""
-        self.tts_engine.say(answer)
-        self.tts_engine.runAndWait()
+        audio = self.tts_engine.process(answer, "tmp.wav")
+        playsound("tmp.wav")
+        # self.tts_engine.say(answer)
+        # self.tts_engine.runAndWait()
 
 
 if __name__ == "__main__":
+    tts_engine = GlowTTS()
+    answer = "Hello"
+    audio = tts_engine.process(answer)
+    playsound(audio)
+    raise ValueError
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--gpt-model-name",
