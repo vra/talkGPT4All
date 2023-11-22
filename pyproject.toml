@@ -19,10 +19,9 @@ classifiers = [
 dependencies = [
 "gpt4all",
 "openai-whisper",
-"pyaudio",
-"pyttsx3",
-"soundfile",
+"playsound",
 "SpeechRecognition",
+"TTS",
 ]
 
 [project.scripts]
