@@ -4,24 +4,28 @@ build-backend = "hatchling.build"
 
 [project]
 name = "talkgpt4all"
-version = "2.1.1"
+version = "3.1.0"
 authors = [
   { name="Yunfeng Wang", email="wyf.brz@gmail.com" },
 ]
-description = "A voice chatbot based on GPT4All and OpenAI Whisper, running on your PC locally"
+description = "A modular voice chatbot supporting API-based LLMs, modern-asr and modern-tts"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-"gpt4all",
-"openai-whisper",
-"playsound",
-"SpeechRecognition",
-"TTS",
+    "modern-asr>=0.2.0",
+    "modern-tts>=0.1.0",
+    "openai>=1.0",
+    "qwen-tts>=0.1.0",
+    "playsound==1.2.2",
+    "pyaudio>=0.2.0",
+    "SpeechRecognition>=3.10",
+	"uv",
+	"pip",
 ]
 
 [project.scripts]

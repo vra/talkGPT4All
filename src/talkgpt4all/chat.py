@@ -1,126 +1,111 @@
-import argparse
-import os
-import subprocess
-import tempfile
+"""Main voice chat bot for talkGPT4All."""
 
-from gpt4all import GPT4All
-from playsound import playsound
-import speech_recognition as sr
-from TTS.api import TTS
-
-
-class GlowTTS:
-    def __init__(self):
-        self.tts = TTS(model_name="tts_models/en/ljspeech/glow-tts", progress_bar=False)
-
-    def process(self, text, audio_save_path):
-        return self.tts.tts_to_file(text=text, file_path=audio_save_path)
+from .llm import (
+    LLMBackend,
+    KimiBackend,
+    DeepSeekBackend,
+)
+from .asr import (
+    ASRBackend,
+    ModernASRBackend,
+)
+from .tts import (
+    TTSBackend,
+    ModernTTSBackend,
+)
 
 
-class GPT4AllChatBot:
-    """Voice chat bot based on Whisper and GPT4All"""
+class VoiceChatBot:
+    """Voice chat bot with pluggable LLM, ASR and TTS backends."""
 
-    def __init__(self, gpt_model_name, whisper_model_type, tts_rate=165):
-        print(f"==> GPT4All model: {gpt_model_name}, Whisper model: {whisper_model_type}")
-        self.gpt_model = GPT4All(gpt_model_name, allow_download=True)
+    def __init__(
+        self,
+        llm_type: str = "kimi",
+        llm_model: str = "moonshot-v1-8k",
+        asr_type: str = "sensevoice",
+        asr_model: str = "sensevoice-small",
+        tts_type: str = "qwen3-tts-0.6b",
+        tts_model: str = "qwen3-tts-0.6b",
+    ):
+        print(
+            f"==> LLM: {llm_type} ({llm_model}), "
+            f"ASR: {asr_type} ({asr_model}), "
+            f"TTS: {tts_type} ({tts_model})"
+        )
+        self.llm: LLMBackend = self._create_llm(llm_type, llm_model)
+        self.asr: ASRBackend = self._create_asr(asr_type, asr_model)
+        self.tts: TTSBackend = self._create_tts(tts_type, tts_model)
 
-        self.whisper_model_type = whisper_model_type
+    @staticmethod
+    def _create_llm(llm_type: str, llm_model: str) -> LLMBackend:
+        llm_type = llm_type.lower().strip()
+        if llm_type in ("kimi", "moonshot"):
+            return KimiBackend(model=llm_model)
+        elif llm_type == "deepseek":
+            return DeepSeekBackend(model=llm_model)
+        else:
+            raise ValueError(
+                f"Unknown LLM type: {llm_type}. "
+                f"Supported: kimi, moonshot, deepseek"
+            )
 
-        self.voice_recognizer = sr.Recognizer()
-        self.mic = sr.Microphone()
+    @staticmethod
+    def _create_asr(asr_type: str, asr_model: str) -> ASRBackend:
+        asr_type = asr_type.lower().strip()
+        if asr_type == "whisper":
+            model_id = asr_model or "whisper-base"
+        elif asr_type in ("funasr", "sensevoice"):
+            model_id = asr_model or "sensevoice-small"
+        else:
+            # Treat as direct modern-asr model ID
+            model_id = asr_type
+        return ModernASRBackend(model_id=model_id)
 
-        self.tts_engine = GlowTTS()
+    @staticmethod
+    def _create_tts(tts_type: str, tts_model: str) -> TTSBackend:
+        tts_type = tts_type.lower().strip()
+        if tts_type == "glowtts":
+            model_id = tts_model or "melotts-zh"
+        elif tts_type == "chattts":
+            model_id = "chattts"
+        elif tts_type == "qwen3-tts-0.6b":
+            model_id = "qwen3-tts-0.6b"
+        elif tts_type == "cosyvoice":
+            model_id = tts_model or "cosyvoice-300m"
+        else:
+            # Treat as direct modern-tts model ID
+            model_id = tts_type
+        return ModernTTSBackend(model_id=model_id)
 
     def run(self):
-        """Run the listen-think-response loop"""
-        input_words = self._voice_to_text()
-        answer = self.run_gpt(input_words)
-        self._text_to_voice(answer)
+        """Run one listen-think-response loop."""
+        input_words = self.asr.transcribe()
+        if not input_words or not input_words.strip():
+            print("No speech detected, skipping...")
+            return
+        print(f"==> You said: {input_words}")
+        answer = self.llm.generate(input_words)
+        print(f"==> Bot: {answer}")
+        self.tts.speak(answer)
 
-    def _voice_to_text(self):
-        """Listen voice and convert voice to text using OpenAI Whisper"""
-        print("Listening...")
-        with self.mic as source:
-            self.voice_recognizer.adjust_for_ambient_noise(source)
-            audio = self.voice_recognizer.listen(source)
-            transcript = self.voice_recognizer.recognize_whisper(
-                audio, self.whisper_model_type
-            )
-            return transcript
 
-    def run_gpt(self, question):
-        """Run GPT4All model with input_data as input"""
+# Keep the old class name for backward compatibility
+class GPT4AllChatBot(VoiceChatBot):
+    """Deprecated: use VoiceChatBot instead."""
 
-        with self.gpt_model.chat_session():
-            answer = self.gpt_model.generate(prompt=question)
-        print("==> answer:", answer)
-        return answer
-
-    def _text_to_voice(self, answer):
-        """Convert text to voice using TTS tools"""
-        tmp_file = tempfile.NamedTemporaryFile(
-            prefix="talkgpt4all-", suffix=".wav", delete=False
+    def __init__(self, gpt_model_name, whisper_model_type, tts_rate=165):
+        # tts_rate is ignored in the new architecture
+        import warnings
+        warnings.warn(
+            "GPT4AllChatBot is deprecated. GPT4All backend has been removed. "
+            "Use VoiceChatBot with an API-based LLM instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
-        tmp_dir = os.path.dirname(tmp_file.name)
-        try:
-            try:
-                audio = self.tts_engine.process(answer, tmp_file.name)
-            except RuntimeError:
-                print(
-                    "Errors occur when converting anwser to audio. please try another question."
-                )
-                return
-
-            playsound(tmp_file.name)
-        finally:
-            tmp_file.close()
-            os.remove(tmp_file.name)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-m",
-        "--gpt-model-name",
-        type=str,
-        default="mistral-7b-openorca.Q4_0.gguf",
-        help="""GPT4All model name, All available names:
-            [
-            mistral-7b-openorca.Q4_0.gguf
-            mistral-7b-instruct-v0.1.Q4_0.gguf
-            gpt4all-falcon-q4_0.gguf
-            orca-2-7b.Q4_0.gguf
-            orca-2-13b.Q4_0.gguf
-            wizardlm-13b-v1.2.Q4_0.gguf
-            nous-hermes-llama2-13b.Q4_0.gguf
-            gpt4all-13b-snoozy-q4_0.gguf
-            mpt-7b-chat-merges-q4_0.gguf
-            orca-mini-3b-gguf2-q4_0.gguf
-            replit-code-v1_5-3b-q4_0.gguf
-            starcoder-q4_0.gguf
-            rift-coder-v0-7b-q4_0.gguf
-            all-MiniLM-L6-v2-f16.gguf
-            em_german_mistral_v01.Q4_0.gguf
-            ]
-            """,
-    )
-    parser.add_argument(
-        "-w",
-        "--whisper-model-type",
-        type=str,
-        default="base",
-        help="whisper model type, default is base",
-    )
-    parser.add_argument(
-        "--voice-rate",
-        type=int,
-        default=165,
-        help="voice rate, default is 165, the larger the speak faster",
-    )
-    args = parser.parse_args()
-
-    chat_bot = GPT4AllChatBot(
-        args.gpt_model_name, args.whisper_model_type, args.voice_rate
-    )
-    while True:
-        chat_bot.run()
+        super().__init__(
+            llm_type="kimi",
+            llm_model="moonshot-v1-8k",
+            asr_type="whisper",
+            asr_model=whisper_model_type,
+            tts_type="glowtts",
+        )

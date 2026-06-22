@@ -1,5 +1,5 @@
-gpt4all
-openai-whisper
-playsound
-SpeechRecognition
-TTS
+modern-asr @ git+https://github.com/vra/modern-asr.git
+modern-tts @ git+https://github.com/vra/modern-tts.git
+openai>=1.0
+playsound==1.2.2
+SpeechRecognition>=3.10
